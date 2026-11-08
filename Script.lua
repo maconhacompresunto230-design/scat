@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
@@ -26,6 +25,7 @@ _G.isRoundEnded = false
 _G.isInnocentMode = false
 _G.roundEndTime = nil
 _G.roundDuration = nil
+_G.detectedRoundTime = nil
 
 local isUpdating = false
 local WHITE_COLOR = Color3.fromRGB(255, 255, 255)
@@ -226,21 +226,15 @@ local function detectarTempoPartida()
     return bestTime
 end
 
+-- DETECÇÃO DINÂMICA DA DURAÇÃO
 local function detectarDuracaoPartida()
     local tempo = detectarTempoPartida()
-    if not tempo then return nil end
 
-    -- O valor observado precisa estar próximo do início da partida.
-    -- Um tempo restante isolado não revela a duração original.
-    if tempo >= 170 and tempo <= 180 then
-        return 180
-    elseif tempo > 180 and tempo <= 360 then
-        return 360
-    elseif tempo > 360 and tempo <= 720 then
-        return 720
+    if not tempo or tempo <= 0 then
+        return nil
     end
 
-    return nil
+    return tempo
 end
 
 local function updateRealtimeDisplay()
@@ -312,6 +306,7 @@ local function unlockRealtimeTimer()
     end
 
     local restante = math.clamp(tempo, 0, duracao)
+
     if restante <= 0 then return end
 
     _G.roundDuration = duracao
@@ -455,6 +450,7 @@ local charConn = player.CharacterAdded:Connect(function(char)
     _G.isInnocentMode = false
     _G.roundEndTime = nil
     _G.roundDuration = nil
+    _G.detectedRoundTime = nil
     scoreLabel = nil
     headerLabel = nil
     trackedLabels = {}
